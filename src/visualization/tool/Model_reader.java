@@ -63,7 +63,7 @@ public class Model_reader {
 				Time t = RuntimeUtil.getExecutionTimeForRunnable(model_runnable, TimeType.ACET, processing_unit,model.getHwModel().getFeatureCategories().get(0).getFeatures(), null);
 				if(t == null) continue;
 				float runnable_time = t.getValue().floatValue();				
-				runnable.set_time(runnable_time);
+				runnable.set_time(runnable_time / 1.0E9f);
 				
 				task.add_runnable(runnable);
 			}
@@ -92,6 +92,8 @@ public class Model_reader {
 		EList<EventChain> model_event_chains = model.getConstraintsModel().getEventChains();
 		for (EventChain model_event_chain : model_event_chains) {
 			Event_chain event_chain = new Event_chain();
+			
+			event_chain.set_name(model_event_chain.getName());
 			
 			//for (EventChainItem event_chain_item : model_event_chain.getSegments()) {
 				//Event stimulus_event = event_chain_item.getEventChain().getStimulus();
