@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.app4mc.amalthea.model.Amalthea;
 import org.eclipse.app4mc.amalthea.model.AmaltheaFactory;
+import org.eclipse.app4mc.amalthea.model.CallSequence;
 import org.eclipse.app4mc.amalthea.model.Label;
 import org.eclipse.app4mc.amalthea.model.ProcessingUnit;
 import org.eclipse.app4mc.amalthea.model.Tag;
@@ -34,6 +35,7 @@ import org.eclipse.app4mc.amalthea.model.util.RuntimeUtil;
 import org.eclipse.app4mc.amalthea.model.util.RuntimeUtil.TimeType;
 import org.eclipse.app4mc.amalthea.model.util.SoftwareUtil;
 import org.eclipse.app4mc.amalthea.model.Runnable;
+import org.eclipse.app4mc.amalthea.model.RunnableEntityGroup;
 import org.eclipse.emf.common.util.EList;
 
 public class LoadModifySaveExample {
@@ -45,7 +47,7 @@ public class LoadModifySaveExample {
 		// final File outputFile = new File("d:/temp/democar_1.amxmi");
 
 		// example: relative path
-		final File inputFile = new File("model-input/democar.amxmi");
+		final File inputFile = new File("model-input/ChallengeModel_withCommImplementationTypev082.amxmi");
 		final File outputFile = new File("model-output/LoadModifySave/democar_1.amxmi");
 
 		// ***** Load *****
@@ -67,6 +69,13 @@ public class LoadModifySaveExample {
 		
 		EList<Task> tasks = model.getSwModel().getTasks();
 		
+		
+		try {
+			CallSequence variable = (CallSequence) tasks.get(0).getCallGraph().getGraphEntries().get(0);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 		for (ProcessingUnit pu : processingUnits)
 		{
 			System.out.println("Processing Unit " + pu.getName() + " -- " + HardwareUtil.getFrequencyOfModuleInHz(pu) + " [Hz]");
@@ -75,7 +84,7 @@ public class LoadModifySaveExample {
 		for (Task task : tasks)
 		{
 			Set<ProcessingUnit> core = DeploymentUtil.getAssignedCoreForProcess(task, model);
-		
+			
 		}
 		
 		EList<Runnable> runnables = model.getSwModel().getRunnables();
@@ -83,7 +92,9 @@ public class LoadModifySaveExample {
 		for (Runnable runnable : runnables)
 		{
 			System.out.println("Labels for runnables " + runnable.getName() + ": ");
-							
+			
+			//SoftwareUtil.getExecutionNeedsList(runnable, null).get(0).getDefault().get(0)
+			//RuntimeUtil.getExecutionTimeExtendedForRunnable(model, runnable, execTimeType, hwFeature, modes) 		
 			Set<Label> readLabels = SoftwareUtil.getReadLabelSet(runnable, null);
 			Set<Label> writeLabels = SoftwareUtil.getWriteLabelSet(runnable, null);
 //			
@@ -102,6 +113,8 @@ public class LoadModifySaveExample {
 				System.out.println("*W " + label.getName() + ", " + label.getSize());
 			}								
 		}
+		
+		System.out.println(model.getConstraintsModel().getEventChains().get(0).getSegments().get(0).getEventChain().getStimulus().getUniqueName());
 
 		// ***** Modify *****
 
