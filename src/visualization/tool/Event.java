@@ -8,7 +8,7 @@ public class Event {
 	
 	public Event(Task task, Event_chain event_chain, Event_type type, float absolute_time) {
 		this.task = task;
-		this.setEvent_chain(event_chain);
+		this.event_chain = event_chain;
 		this.type = type;
 		this.absolute_time = absolute_time;
 	}
@@ -24,14 +24,8 @@ public class Event {
 	public Task get_task() {
 		return task;
 	}
-
-	public Event_chain getEvent_chain() {
+	
+	public Event_chain get_event_chain() {
 		return event_chain;
 	}
-
-	public void setEvent_chain(Event_chain event_chain) {
-		this.event_chain = event_chain;
-	}
-	
-	
 }

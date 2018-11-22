@@ -3,6 +3,7 @@ package unittests;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.eclipse.app4mc.amalthea.model.EventChain;
 import org.junit.Before;
@@ -11,62 +12,27 @@ import org.junit.Test;
 import visualization.tool.Scheduler;
 import visualization.tool.Event;
 import visualization.tool.Event_chain;
+import visualization.tool.Event_type;
 import visualization.tool.Model_reader;
 import visualization.tool.Runnable;
 import visualization.tool.Task;
 
 public class SchedulerTest {
 
-	ArrayList<Task> taskList;
+	ArrayList<EventTest> eventTests;
 
 	@Before
 	public void execBefore() {
-
-		taskList = new ArrayList<Task>();
-
-		Task t0 = new Task();
-		Task t1 = new Task();
-		Task t2 = new Task();
-		Task t3 = new Task();
-		Task t4 = new Task();
-		Task t5 = new Task();
-		Task t6 = new Task();
-		Task t7 = new Task();
-		Task t8 = new Task();
-		Task t9 = new Task();
-
-		t0.set_name("Task_ESSP0");
-		t1.set_name("Task_ESSP1");
-		t2.set_name("Task_ESSP2");
-		t3.set_name("Task_ESSP3");
-		t4.set_name("Task_ESSP4");
-		t5.set_name("Task_ESSP5");
-		t2.set_name("Task_ESSP6");
-		t3.set_name("Task_ESSP7");
-		t4.set_name("Task_ESSP8");
-		t5.set_name("Task_ESSP9");
-
-		t0.set_periodic_time(5);
-		t1.set_periodic_time(10);
-		t2.set_periodic_time(10);
-		t3.set_periodic_time(5);
-		t4.set_periodic_time(5);
-		t5.set_periodic_time(5);
-		t6.set_periodic_time(10);
-		t7.set_periodic_time(10);
-		t8.set_periodic_time(10);
-		t9.set_periodic_time(5);
-
-		taskList.add(t0);
-		taskList.add(t1);
-		taskList.add(t2);
-		taskList.add(t3);
-		taskList.add(t4);
-		taskList.add(t5);
-		taskList.add(t6);
-		taskList.add(t7);
-		taskList.add(t8);
-		taskList.add(t9);
+		eventTests = new ArrayList<EventTest>();
+		eventTests.add(new EventTest("Task_ESSP0", Event_type.TASK_START, 5));
+		eventTests.add(new EventTest("Task_ESSP8", Event_type.TASK_END, 4.5f));
+		eventTests.add(new EventTest("Task_ESSP5", Event_type.TASK_QUEUED, 15));
+		eventTests.add(new EventTest("Task_ESSP1", Event_type.TASK_START, 12.6f));
+		eventTests.add(new EventTest("Task_ESSP9", Event_type.TASK_END, 17.6f));
+		eventTests.add(new EventTest("Task_ESSP6", Event_type.TASK_QUEUED, 0));
+		eventTests.add(new EventTest("Task_ESSP2", Event_type.TASK_END, 3.0f));
+		eventTests.add(new EventTest("Task_ESSP7", Event_type.TASK_START, 14.0f));
+		eventTests.add(new EventTest("Task_ESSP3", Event_type.TASK_QUEUED, 20.0f));
 	}
 
 	@Test
@@ -74,12 +40,6 @@ public class SchedulerTest {
 		Model_reader model = new Model_reader();
 
 		model.read_model("model-input/model_democar_AMALTHEA_Democar_Corrected.amxmi");
-
-		System.out.println("TASKS");
-		for (Task t : model.tasks) {
-			System.out.println("Name: ");
-			System.out.println(t.get_name());
-		}
 
 		Scheduler sch = new Scheduler();
 
@@ -91,6 +51,35 @@ public class SchedulerTest {
 
 		sch.build_event_chains(evcs, 100);
 
+		/*
+		 * Event matchingEvent = sch.event_queue.stream().filter(e -> { // float diff =
+		 * 
+		 * if (eventTests.get(0).taskName.equalsIgnoreCase(e.get_task().get_name()) &&
+		 * e.get_type() == eventTests.get(0).type) return true; return false;
+		 * }).findAny().orElse(null);
+		 */
+
+		/*
+		 * if (matchingEvent != null) {
+		 * System.out.println(matchingEvent.get_task().get_name()); }
+		 */
+
+		int count = 0;
+		for (EventTest evnT : eventTests) {
+			for (Event event : sch.event_queue) {
+				float diff = Math.abs(event.get_time() - evnT.absolute_time);
+				if (evnT.taskName.equalsIgnoreCase(event.get_task().get_name()) && evnT.type == event.get_type()
+						&& diff < 0.1) {
+					System.out.println(event.get_task().get_name() + " " + event.get_type() + " " + event.get_time());
+					count++;
+				}
+			}
+		}
+		
+		assertEquals(eventTests.size(), count);
+
+		System.out.println(count);
+		
 		for (Event evn : sch.event_queue) {
 			System.out.println(evn.get_task().get_name());
 			System.out.println("Type");
@@ -98,15 +87,16 @@ public class SchedulerTest {
 			System.out.println("Absolute Time");
 			System.out.println(evn.get_time());
 			System.out.println("");
-			Event_chain event_chain = ((Event) evn).getEvent_chain();
+			Event_chain event_chain = ((Event) evn).get_event_chain();
+
 			if (event_chain != null) {
 				System.out.println("");
 				System.out.println(event_chain.get_name());
 				System.out.println("");
 
 			}
-
 		}
+
 	}
 
 }

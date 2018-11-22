@@ -140,9 +140,9 @@ public class ModelReaderTest {
 			i++;
 		}
 
-		System.out.println("Event Chains Runnables");
+		//System.out.println("Event Chains Runnables");
 
-		ArrayList<Event_chain> evcs = model.event_chains;
+		//ArrayList<Event_chain> evcs = model.event_chains;
 		
 		
 

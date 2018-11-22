@@ -32,8 +32,16 @@ import com.sun.javafx.event.EventUtil;
 
 public class Model_reader {
 
-	public ArrayList<visualization.tool.Task> tasks;
-	public ArrayList<Event_chain> event_chains;
+	private ArrayList<visualization.tool.Task> tasks;
+	private ArrayList<Event_chain> event_chains;
+	
+	public ArrayList<visualization.tool.Task> get_tasks(){
+		return tasks;
+	}
+	
+	public ArrayList<Event_chain> get_event_chains(){
+		return event_chains;
+	}
 	
 	public void read_model(String file_name) {
 		
@@ -60,7 +68,7 @@ public class Model_reader {
 				String runnable_name = model_runnable.getName();
 				runnable.set_name(runnable_name);
 				
-				Time t = RuntimeUtil.getExecutionTimeForRunnable(model_runnable, TimeType.ACET, processing_unit,model.getHwModel().getFeatureCategories().get(0).getFeatures(), null);
+				Time t = RuntimeUtil.getExecutionTimeForRunnable(model_runnable, TimeType.ACET, processing_unit, model.getHwModel().getFeatureCategories().get(0).getFeatures(), null);
 				if(t == null) continue;
 				float runnable_time = t.getValue().floatValue();				
 				runnable.set_time(runnable_time / 1.0E9f);
@@ -100,17 +108,20 @@ public class Model_reader {
 			Event stimulus_event = model_event_chain.getStimulus();
 			
 			if (stimulus_event instanceof RunnableEvent) {
-				event_chain.add_runnable(((RunnableEvent) stimulus_event).getEntity().getName());
+				String stimulus_runnable_name = ((RunnableEvent) stimulus_event).getEntity().getName();
+				Event_chain_entry stimulus_entry = new Event_chain_entry(stimulus_runnable_name, Event_type.CHAIN_START);
+				event_chain.add_entry(stimulus_entry);
 			}
 			else {
 				break;
 			}
-			
 			//Event response_event = event_chain_item.getEventChain().getResponse();
 			Event response_event = model_event_chain.getResponse();
 			
 			if (response_event instanceof RunnableEvent) {
-				event_chain.add_runnable(((RunnableEvent) response_event).getEntity().getName());
+				String response_runnable_name = ((RunnableEvent) response_event).getEntity().getName();
+				Event_chain_entry response_entry = new Event_chain_entry(response_runnable_name, Event_type.CHAIN_END);
+				event_chain.add_entry(response_entry);
 			}
 			else {
 				break;

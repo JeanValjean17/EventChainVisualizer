@@ -6,7 +6,11 @@ import java.util.Comparator;
 public class Scheduler {
 	
 	private float current_time;
-	public ArrayList<Event> event_queue;
+	private ArrayList<Event> event_queue;
+	
+	public ArrayList<Event> get_event_queue() {
+		return event_queue;
+	}
 	
 	public Scheduler() {
 		current_time = 0;
@@ -54,24 +58,26 @@ public class Scheduler {
 	
 	public void sort_event_queue() {
 		
-		/*class Sort_by_time_ascending implements Comparator<Event> 
+		class Sort_by_time_ascending implements Comparator<Event> 
 		{ 
 		    public int compare(Event a, Event b) 
 		    { 
-		        return (int)(a.get_time() - b.get_time()); 
+		        if (a.get_time() - b.get_time() == 0) return 0;
+		        else if (a.get_time() - b.get_time() < 0) return -1;
+		        else return 1;
 		    } 
 		}
 		
-		event_queue.sort(new Sort_by_time_ascending());*/
+		event_queue.sort(new Sort_by_time_ascending());
 		
-		for (int i = 0; i < event_queue.size(); i++) {
+		/*for (int i = 0; i < event_queue.size(); i++) {
 			for (int j = i; j < event_queue.size(); j++) {
 				if (event_queue.get(j).get_time() < event_queue.get(i).get_time()) {
 					Event temp = event_queue.set(i, event_queue.get(j));
 					event_queue.set(j, temp);
 				}
 			}
-		}
+		}*/
 	}
 	
 	public void build_event_chains(ArrayList<Event_chain> event_chains, float max_time) {
@@ -84,12 +90,13 @@ public class Scheduler {
 			
 			while (max_time_reached == false) {
 				
-				for (String runnable_name : event_chain.get_runnables_names()) {
+				for (Event_chain_entry event_chain_entry : event_chain.get_entries()) {
+					String runnable_name = event_chain_entry.get_runnable_name();
 					Event selected_event = get_selected_runnable_event(runnable_name);
 					
 					if (selected_event != null) {
-						float runnable_absolute_time = selected_event.get_time() + get_runnable_offset_from_task_start(selected_event.get_task(), runnable_name);
-						Event chain_element = new Event(selected_event.get_task(), event_chain, Event_type.CHAIN_ELEMENT, runnable_absolute_time);
+						float runnable_absolute_time = selected_event.get_time() + get_runnable_offset_from_task_start(selected_event.get_task(), runnable_name, event_chain_entry.get_type());
+						Event chain_element = new Event(selected_event.get_task(), event_chain, event_chain_entry.get_type(), runnable_absolute_time);
 						event_queue.add(chain_element);
 						current_time = runnable_absolute_time;
 					}
@@ -186,14 +193,18 @@ public class Scheduler {
 		return selected_event;
 	}
 	
-	private float get_runnable_offset_from_task_start(Task task, String runnable_name) {
+	private float get_runnable_offset_from_task_start(Task task, String runnable_name, Event_type event_type) {
 		float time = 0;
 		
 		for (Runnable runnable : task.get_runnables()) {
 			
 			time += runnable.get_time();
-			
-			if (runnable.get_name().compareTo(runnable_name) == 0) {
+			//System.out.println("runnable " + runnable.get_name() + " added " + task.get_name() + " runnable name " + runnable_name + " compare result " + String.valueOf(runnable.get_name().equalsIgnoreCase(runnable_name)));
+			if (runnable.get_name().equalsIgnoreCase(runnable_name) == true) {
+				if (event_type == Event_type.CHAIN_START) {
+					time -= runnable.get_time();
+					//System.out.println("runnable found " + task.get_name());
+				}
 				break;
 			}
 		}

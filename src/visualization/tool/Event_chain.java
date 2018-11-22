@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Event_chain {
 	private String name;
-	private ArrayList<String> runnables_names;
+	private ArrayList<Event_chain_entry> event_chain_entries;
 	
 	public Event_chain() {
-		runnables_names = new ArrayList<String>();
+		event_chain_entries = new ArrayList<Event_chain_entry>();
 		name = "not set";
 	}
 	
@@ -19,17 +19,17 @@ public class Event_chain {
 		return name;
 	}
 	
-	public void add_runnable(String runnable_name) {
-		for (String string : runnables_names) {
-			if (string.compareTo(runnable_name) == 0) {
+	public void add_entry(Event_chain_entry event_chain_entry) {
+		for (Event_chain_entry old_event_chain_entry : event_chain_entries) {
+			if (old_event_chain_entry.get_runnable_name().compareTo(event_chain_entry.get_runnable_name()) == 0) {
 				return;
 			}
 		}
-		runnables_names.add(runnable_name);
+		event_chain_entries.add(event_chain_entry);
 	}
 	
-	public ArrayList<String> get_runnables_names(){
-		return runnables_names;
+	public ArrayList<Event_chain_entry> get_entries(){
+		return event_chain_entries;
 	}
 	
 }
