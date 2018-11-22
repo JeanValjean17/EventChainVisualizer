@@ -14,8 +14,9 @@ import org.eclipse.sphinx.emf.resource.ContextAwareProxyURIHelper;
 public class Visualizer {
 	
 	final float monospaced_font_ratio = 3f / 5f ;
-	final int task_font_size = 30;
+	final int task_font_size = 25;
 	final int scale_font_size = 20;
+	final int measurement_font_size = 15;
 	final int grid_line_height = 50;
 	final int grid_line_width = 10;
 	final int dash_index = 9;
@@ -30,8 +31,11 @@ public class Visualizer {
 	final int scale_line_size = 3;
 	final int scale_line_width = 3;
 	final int chain_line_width = 2;
+	final int measurement_offset = 30;
+	final int measurement_line_width = 2;
 	final String unit = "ms";
 	final Color task_color = Color.GREEN;
+	final Color measurement_color = Color.RED;
 	private ArrayList<Event> event_queue;
 	private ArrayList<Task> tasks;
 	private ArrayList<Event_chain> event_chains;
@@ -60,11 +64,11 @@ public class Visualizer {
 		grid_height = tasks.size() * grid_line_height;
 		grid_width = (int)(max_time * time_ratio);
 		
-		image_height = grid_height + number_offset;
+		image_height = grid_height + number_offset + measurement_offset;
 		image_width = grid_width + name_offset;
 	}
 	
-	public BufferedImage draw_event_queue(Event_chain event_chain) {
+	public BufferedImage draw_event_queue(Event_chain event_chain, boolean runnable_level) {
 		
 		BufferedImage image = new BufferedImage(image_width, image_height, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D graphics = image.createGraphics();
@@ -75,7 +79,7 @@ public class Visualizer {
 		draw_grid(graphics, name_offset, 0, grid_width, grid_height);
 		
 		for (int i = 0; i < tasks.size(); i++) {
-			print_string(graphics, 0, grid_line_height * (1 + i) - (grid_line_height / 2) + (task_font_size / 2), tasks.get(i).get_name(), task_font_size);
+			print_string(graphics, 0, grid_line_height * (1 + i) - (grid_line_height / 2) + (task_font_size / 2), tasks.get(i).get_name(), task_font_size, Color.BLACK);
 		}
 		
 		for (Event event : event_queue) {
@@ -102,7 +106,48 @@ public class Visualizer {
 				if (start_event.get_event_chain() == event_chain) {
 					Event end_event = get_event_chain_end(start_event);
 					if (end_event != null) {
-						draw_chain_event(graphics, start_event, end_event);
+						if (runnable_level == true) {
+							draw_chain_event(graphics, start_event, end_event);
+						}
+						else {
+							Event task_start_event = null;
+							for (Event event : event_queue) {
+								if (event.get_type() == Event_type.TASK_START) {
+									if (event.get_task() == start_event.get_task()) {
+										if (event.get_time() <= start_event.get_time()) {
+											if (task_start_event == null) {
+												task_start_event = event;
+											}
+											else {
+												if (event.get_time() > task_start_event.get_time()) {
+													task_start_event = event;
+												}
+											}
+										}
+									}
+								}
+							}
+							
+							Event task_end_event = null;
+							for (Event event : event_queue) {
+								if (event.get_task() == end_event.get_task()) {
+									if (event.get_type() == Event_type.TASK_END) {
+										if (event.get_time() >= end_event.get_time()) {
+											if (task_end_event == null) {
+												task_end_event = event;
+											}
+											else {
+												if (event.get_time() < task_end_event.get_time()) {
+													task_end_event = event;
+												}
+											}
+										}
+									}
+								}
+							}
+							
+							draw_chain_event(graphics, task_start_event, task_end_event);
+						}
 					}
 				}
 			}
@@ -145,16 +190,43 @@ public class Visualizer {
 		draw_chain_event_line(graphics, chain_end);
 		
 		Task task_start = chain_start.get_task();
-		int x1 = name_offset + (int)(chain_start.get_time() * time_ratio);
-		int y1 = (tasks.indexOf(task_start) + 1) * grid_line_height - (grid_line_height / 2);
+		int x_start = name_offset + (int)(chain_start.get_time() * time_ratio);
+		int y_start = (tasks.indexOf(task_start) + 1) * grid_line_height - (grid_line_height / 2);
 		
 		Task task_end = chain_end.get_task();
-		int x2 = name_offset + (int)(chain_end.get_time() * time_ratio);
-		int y2 = (tasks.indexOf(task_end) + 1) * grid_line_height - (grid_line_height / 2);
+		int x_end = name_offset + (int)(chain_end.get_time() * time_ratio);
+		int y_end = (tasks.indexOf(task_end) + 1) * grid_line_height - (grid_line_height / 2);
 		
 		graphics.setColor(Color.BLACK);
 		graphics.setStroke(new BasicStroke(chain_line_width));
-		graphics.drawLine(x1, y1, x2, y2);
+		graphics.drawLine(x_start, y_start, x_end, y_end);
+		
+		int x_measurement_start = name_offset + (int)(chain_start.get_time() * time_ratio);
+		int y_measurement_start = (tasks.indexOf(task_start) + 1) * grid_line_height;
+		
+		graphics.setColor(measurement_color);
+		graphics.setStroke(new BasicStroke(measurement_line_width));
+		graphics.drawLine(x_measurement_start, y_measurement_start, x_measurement_start, grid_height);
+		graphics.drawLine(x_measurement_start, grid_height + number_offset + (measurement_offset / 2), x_measurement_start, grid_height + number_offset + measurement_offset);
+		
+		int x_measurement_end = name_offset + (int)(chain_end.get_time() * time_ratio);
+		int y_measurement_end = (tasks.indexOf(task_end) + 1) * grid_line_height;
+		
+		graphics.setColor(measurement_color);
+		graphics.setStroke(new BasicStroke(measurement_line_width));
+		graphics.drawLine(x_measurement_end, y_measurement_end, x_measurement_end, grid_height);
+		graphics.drawLine(x_measurement_end, grid_height + number_offset + (measurement_offset / 2), x_measurement_end, grid_height + number_offset + measurement_offset);
+		
+		graphics.setColor(measurement_color);
+		graphics.setStroke(new BasicStroke(measurement_line_width));
+		graphics.drawLine(x_measurement_start, grid_height + number_offset + (int)(measurement_offset * 0.75), x_measurement_end, grid_height + number_offset + (int)(measurement_offset * 0.75));
+		
+		float time_difference = (x_measurement_end - x_measurement_start) / time_ratio;
+		String time_difference_string = String.valueOf(time_difference);
+		
+		int x_measurement_string = (int)(x_measurement_start + ((x_measurement_end - x_measurement_start) / 2) - (time_difference_string.length() * measurement_font_size * monospaced_font_ratio / 2f));
+		int y_measurement_string = grid_height + number_offset + (measurement_offset / 2);
+		print_string(graphics, x_measurement_string, y_measurement_string, time_difference_string, measurement_font_size, measurement_color);
 	}
 	
 	private void draw_chain_event_line(Graphics2D graphics, Event chain_event) {
@@ -181,9 +253,9 @@ public class Visualizer {
 		graphics.fillRect(x, y - grid_line_height, width, grid_line_height);
 	}
 	
-	private void print_string(Graphics2D graphics, int x, int y, String s, int font_size) {
+	private void print_string(Graphics2D graphics, int x, int y, String s, int font_size, Color color) {
 		graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, font_size));
-		graphics.setColor(Color.BLACK);
+		graphics.setColor(color);
 		graphics.drawString(s, x, y);
 	}
 	
@@ -204,7 +276,7 @@ public class Visualizer {
 		for (int x = x_start; x <= x_start + width; x += scale_step) {
 			
 			String s = String.valueOf(scale_value);
-			print_string(graphics, x - (int)((s.length() * scale_font_size * monospaced_font_ratio) / 2), y_start + height + number_offset, s, scale_font_size);
+			print_string(graphics, x - (int)((s.length() * scale_font_size * monospaced_font_ratio) / 2), y_start + height + number_offset, s, scale_font_size, Color.BLACK);
 			
 			graphics.setColor(Color.BLACK);
 			graphics.setStroke(new BasicStroke(scale_line_width));
@@ -213,6 +285,6 @@ public class Visualizer {
 			scale_value += scale_step / time_ratio;
 		}
 		
-		print_string(graphics, x_start - (int)(scale_font_size * monospaced_font_ratio * (unit.length() + 3)), y_start + height + number_offset, unit, scale_font_size);
+		print_string(graphics, x_start - (int)(scale_font_size * monospaced_font_ratio * (unit.length() + 3)), y_start + height + number_offset, unit, scale_font_size, Color.BLACK);
 	}
 }

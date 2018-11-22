@@ -115,7 +115,7 @@ public class ModelReaderTest {
 		int i = 0;
 
 		System.out.println("TASKS");
-		for (Task t : model.tasks) {
+		for (Task t : model.get_tasks()) {
 			/*System.out.println("Name: ");
 			System.out.println(t.get_name());
 			System.out.print("Periodic Time: ");

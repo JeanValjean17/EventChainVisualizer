@@ -33,6 +33,8 @@ public class SchedulerTest {
 		eventTests.add(new EventTest("Task_ESSP2", Event_type.TASK_END, 3.0f));
 		eventTests.add(new EventTest("Task_ESSP7", Event_type.TASK_START, 14.0f));
 		eventTests.add(new EventTest("Task_ESSP3", Event_type.TASK_QUEUED, 20.0f));
+		eventTests.add(new EventTest("Task_ESSP4", Event_type.CHAIN_START, 1.0f));
+		eventTests.add(new EventTest("Task_ESSP5", Event_type.CHAIN_END, 1.3f));
 	}
 
 	@Test
@@ -43,30 +45,17 @@ public class SchedulerTest {
 
 		Scheduler sch = new Scheduler();
 
-		ArrayList<Event_chain> evcs = model.event_chains;
+		ArrayList<Event_chain> evcs = model.get_event_chains();
 
-		sch.build_schedule(model.tasks, 100);
+		sch.build_schedule(model.get_tasks(), 100);
 
 		sch.sort_event_queue();
 
 		sch.build_event_chains(evcs, 100);
 
-		/*
-		 * Event matchingEvent = sch.event_queue.stream().filter(e -> { // float diff =
-		 * 
-		 * if (eventTests.get(0).taskName.equalsIgnoreCase(e.get_task().get_name()) &&
-		 * e.get_type() == eventTests.get(0).type) return true; return false;
-		 * }).findAny().orElse(null);
-		 */
-
-		/*
-		 * if (matchingEvent != null) {
-		 * System.out.println(matchingEvent.get_task().get_name()); }
-		 */
-
 		int count = 0;
 		for (EventTest evnT : eventTests) {
-			for (Event event : sch.event_queue) {
+			for (Event event : sch.get_event_queue()) {
 				float diff = Math.abs(event.get_time() - evnT.absolute_time);
 				if (evnT.taskName.equalsIgnoreCase(event.get_task().get_name()) && evnT.type == event.get_type()
 						&& diff < 0.1) {
@@ -80,7 +69,7 @@ public class SchedulerTest {
 
 		System.out.println(count);
 		
-		for (Event evn : sch.event_queue) {
+		for (Event evn : sch.get_event_queue()) {
 			System.out.println(evn.get_task().get_name());
 			System.out.println("Type");
 			System.out.println(evn.get_type());
@@ -96,7 +85,6 @@ public class SchedulerTest {
 
 			}
 		}
-
 	}
 
 }
