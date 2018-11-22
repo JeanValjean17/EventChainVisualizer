@@ -1,12 +1,12 @@
-#EventChainVisualizer
-##*Winter School Project 2018 - Stream C*
+# EventChainVisualizer
+## *Winter School Project 2018 - Stream C*
 
 
 
-Show Event Chain in a implicit inter task communication.
+*Show Event Chain in a implicit inter task communication*
 
 
-Aly Sakr/Coding  
-Mauricio Camacho Management   
-Bui The Bao Documentation  
-Jean Herrera  Testing  
+1. **Aly Sakr**, *Coding*
+2. **Mauricio Camacho**, *Management* 
+3. **Bui The Bao**, *Documentation*  
+4. **Jean Herrera**, *Testing*  
