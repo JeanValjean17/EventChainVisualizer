@@ -1,4 +1,4 @@
-# EventChainVisualizer
+EventChainVisualizer
 Winter School Project 2018 - Stream C
 
 
