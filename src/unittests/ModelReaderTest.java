@@ -101,7 +101,6 @@ public class ModelReaderTest {
 		tasks.add(new TaskTest("Task_ESSP7", 0, 10, rnT7));
 		tasks.add(new TaskTest("Task_ESSP8", 0, 10, rnT8));
 		tasks.add(new TaskTest("Task_ESSP9", 0, 5, rnT9));
-		
 	}
 
 	@Test
@@ -110,18 +109,17 @@ public class ModelReaderTest {
 		Model_reader model = new Model_reader();
 		
 		model.read_model("model-input/model_democar_AMALTHEA_Democar.amxmi");
-		// model.read_model("model-input/ChallengeModel_withCommImplementationTypev082.amxmi");
 
 		int i = 0;
 
 		System.out.println("TASKS");
 		for (Task t : model.get_tasks()) {
-			/*System.out.println("Name: ");
+			System.out.println("Name: ");
 			System.out.println(t.get_name());
 			System.out.print("Periodic Time: ");
-			System.out.println(t.get_periodic_time());*/
+			System.out.println(t.get_periodic_time());
 			ArrayList<Runnable> runnables = t.get_runnables();
-			//System.out.println("Runnables: ");
+			System.out.println("Runnables: ");
 			
 			int j = 0;
 			
@@ -129,9 +127,10 @@ public class ModelReaderTest {
 			assertEquals(t.get_periodic_time(), tasks.get(i).periodic_time, 2);
 			
 			for (Runnable r : runnables) {
-				/*System.out.println(r.get_name());
+				
+				System.out.println(r.get_name());
 				System.out.print("Runnable Time: ");
-				System.out.println(r.get_time());*/
+				System.out.println(r.get_time());
 				
 				assertEquals(r.get_time(), tasks.get(i).runnables.get(j).time, 4);
 				assertEquals(r.get_name(), tasks.get(i).runnables.get(j).name);
@@ -139,20 +138,6 @@ public class ModelReaderTest {
 			}
 			i++;
 		}
-
-		//System.out.println("Event Chains Runnables");
-
-		//ArrayList<Event_chain> evcs = model.event_chains;
-		
-		
-
-		/*for (Event_chain evc : evcs) {
-			//ArrayList<String> runnables = evc.get_runnables();
-
-			for (String r : runnables) {
-				System.out.println(r);
-			}
-		}*/
 
 	}
 }
